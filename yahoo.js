@@ -19,7 +19,9 @@ symbols = ['AAPL', 'TSLA', 'PLTR',
            'NIO', 'AMZN', 'ARKK',
            'ARKW', 'ATVI', 'BABA',
            'DIS', 'FB', 'FSLY', 'GOOG',
-           'IPOB', 'MSFT', 'NFLX', 'PLTR']
+           'IPOB', 'MSFT', 'NFLX', 'U',
+           'DOYU', 'TAN', 'HUYA', 'RH',
+           'TSM']
 
 // async function insertTodayStockData(){
     
@@ -32,13 +34,17 @@ var quoteAndWriteDB = async function() {
             {
                 symbol: symbol,
                 modules: ['price']
-            }
-
-        )
+            })
         .then(async res=>{
-            // console.log(symbol ,res.price.regularMarketPreviousClose, (res.price.regularMarketTime))
-            await stock_history_data_model.insertMany({symbol: symbol, closePrice: res.price.regularMarketPreviousClose, Date: res.price.regularMarketTime})
-
+            await stock_history_data_model.find({symbol: symbol, Date:res.price.regularMarketTime} 
+            ).then(async resolve=>{
+                //console.log(resolve)
+                if(resolve.length==0){
+                   await stock_history_data_model.insertMany({symbol: symbol, closePrice: res.price.regularMarketPreviousClose, Date: res.price.regularMarketTime})
+                }else{
+                    console.log('Data already exist')
+                }
+            })       
         }, rej=>{
             console.log(rej)
 
