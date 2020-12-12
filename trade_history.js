@@ -13,23 +13,29 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 require('dotenv').config()
-
-
-const user = process.env.DB_USER;
-const pw = process.env.DB_PASSWORD;
-const svr = process.env.DB_SERVER;
-const db = process.env.DB_NAME;
-const port = process.env.PORT;
-
-// console.log(`mongodb://${user}:${pw}@${svr}:${port}/${db}`)
-
-
-// mongoose.connect(`mongodb://${user}:${pw}@${svr}:${port}/${db}`, {useUnifiedTopology: true, useNewUrlParser: true })
-// mongoose.connect(`mongodb://jo1ce:Alan0114@mongodb:27017/trade`, {useUnifiedTopology: true, useNewUrlParser: true })
+const user;
+const pw;
+const svr;
+const db;
+const port;
+if(process.env.ENV==='DEV'){
+    user = process.env.DB_USER;
+    pw = process.env.DB_PASSWORD;
+    svr = process.env.DB_SERVER;
+    db = process.env.DB_NAME;
+    port = process.env.PORT;
+}else{
+    user = process.env.DB_USER;
+    pw = process.env.DB_PASSWORD;
+    svr = process.env.DB_SERVER;
+    db = process.env.DB_NAME;
+    port = process.env.PORT;
+}
 
 
 const historicalTradeDataModel = mongoose.model('historical_trade_data', new mongoose.Schema({symbol: String, price: Number, amount: Number, date: Date}));
-// historicalTradeDataModel.insertMany({symbol: 'PLTR', price: 21.50, amount: 5, date: new Date('2020-12-03')});
+const positionDataModel = mongoose.model('position', new mongoose.Schema({symbol: String, avgPrice: Number, amount: Number}));
+
 
 // =====  Read  ======
 app.get('/api/stocks/:id', async(req, res)=>{
@@ -49,7 +55,22 @@ app.post('/api/stocks', async(req, res)=>{
     await historicalTradeDataModel.insertMany({symbol: req.body.symbol, price: req.body.price, amount: req.body.amount, date: req.body.date})
     .then(console.log('insert success'))
     console.log(req.body.symbol);
-    res.json(req.body.symbol);
+    res.json(req.body.price);
+    
+    var doc = await positionDataModel.find({symbol: req.body.symbol}).exec()
+
+    if( doc.length != 0 ){
+        filter = { symbol: req.body.symbol}
+        update = { avgPrice: ((doc[0].amount*doc[0].avgPrice)+(req.body.price*req.body.amount))/(req.body.amount+doc[0].amount),
+                   amount: doc[0].amount + req.body.amount }
+        await positionDataModel.findOneAndUpdate(filter, update).exec()
+        console.log('update a existing symbol successful')
+    }
+    // // new symbol for position
+    else{
+        await positionDataModel.insertMany({symbol: req.body.symbol, avgPrice: req.body.price, amount: req.body.amount})
+        console.log('insert a new symbol to position')
+    }
 })
 
 // ======= Update =======
@@ -75,8 +96,9 @@ app.listen(app_port, ()=>{
 })
 
 async function main(){
-
+    
     const openUrl = `mongodb://${user}:${pw}@${svr}:${port}/${db}`;
+    //const openUrl = 'mongodb://jo1ce:Alan0114@localhost:27018/trade';  local_testing
     await mongoose.connect(openUrl, {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true }).then(console.log('DB connected!'))
 
     // await historicalTradeDataModel.find((err, res)=>{
