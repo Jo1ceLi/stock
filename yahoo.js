@@ -1,33 +1,24 @@
 var yf = require('yahoo-finance')
 var mongoose = require('mongoose')
 
-// yf.historical({
-//     symbol: 'AAPL',
-//     from: '2020-12-01',
-//     to: '2020-12-02'
-// }, function(err, quote){
-//     if(err){
-//         console.log()
-//     }
-//     console.log(quote)
-// })
-
 mongoose.connect('mongodb://jo1ce:Alan0114@localhost:27018/trade', {useUnifiedTopology: true, useNewUrlParser: true });
 const stock_history_data_model = mongoose.model('stock_history_data', new mongoose.Schema({symbol: String, closePrice: Number, Date: Date}));
+const position_model = mongoose.model('position', new mongoose.Schema({symbol: String, avgPrice: Number, amount: Number}));
 
-symbols = ['AAPL', 'TSLA', 'PLTR',
-           'NIO', 'AMZN', 'ARKK',
-           'ARKW', 'ATVI', 'BABA',
-           'DIS', 'FB', 'FSLY', 'GOOG',
-           'IPOB', 'MSFT', 'NFLX', 'U',
-           'DOYU', 'TAN', 'HUYA', 'RH',
-           'TSM']
-
-// async function insertTodayStockData(){
+async function quotePosition() {
     
-// }
+    position_symbol = []
+    var result = await position_model.find();
+    result.forEach(element => {
+        position_symbol.push(element.symbol);
+        // console.log(element.symbol);
+    });
+    position_symbol.pop()
+    return position_symbol
+    
+}
 
-var quoteAndWriteDB = async function() {
+async function quoteAndWriteDB(symbols) {
     for(let symbol of symbols)
     {
         await yf.quote(
@@ -55,21 +46,10 @@ var quoteAndWriteDB = async function() {
 }
 
 const main = async() =>{
-    await quoteAndWriteDB();
-    console.log('Finish write DB')
-    console.log("closed connection")
+    var symbols = await quotePosition();
+    await quoteAndWriteDB(symbols);
+    console.log(symbols)
     mongoose.connection.close();
 }
 
 main()
-
-// yf.quote({
-//     symbol: 'AAPL',
-//     modules: ['price']
-// },function(err, quote){
-//     if(err){
-//         console.log(err)
-//     }
-//     console.log(quote.price.regularMarketPreviousClose)
-//     console.log('finish quote')
-// })
