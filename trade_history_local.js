@@ -50,45 +50,64 @@ const positionDataModel = mongoose.model('position', new mongoose.Schema({symbol
 // historicalTradeDataModel.insertMany({symbol: 'PLTR', price: 21.50, amount: 5, date: new Date('2020-12-03')});
 
 // =====  Read  ======
-app.get('/api/stocks/:id', async(req, res)=>{
+app.get('/api/trade/:id', async(req, res)=>{
     var docs = await historicalTradeDataModel.findById(req.params.id)
     .then(console.log('found one data'))
     res.json(docs)
 })
 
-app.get('/api/stocks', async (req, res)=>{
+app.get('/api/trade', async (req, res)=>{
     var docs = await historicalTradeDataModel.find()
-    .then(console.log('found datas'));
+    .then()
+
+    res.json(docs)
+})
+
+app.get('/api/positions', async (req, res)=>{
+    var docs = await positionDataModel.find()
+    .then()
     res.json(docs)
 })
 
 // ====== Create ======
-app.post('/api/stocks', async(req, res)=>{
-    await historicalTradeDataModel.insertMany({symbol: req.body.symbol, price: req.body.price, amount: req.body.amount, date: req.body.date})
-    .then(console.log('insert success'))
-    console.log(req.body.symbol);
-    res.json(req.body.price);
+app.post('/api/trade', async(req, res)=>{
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    // try{
+        const opts = { session, new: true };
+        var trade_insertManyRes = await historicalTradeDataModel.insertMany({symbol: req.body.symbol, price: req.body.price, amount: req.body.amount, date: req.body.date}, opts)
+        // .then(console.log('insert success'))
+        console.log("tradeInsertManyRes",trade_insertManyRes);
+        var doc = await positionDataModel.find({symbol: req.body.symbol}, opts).exec()
+
+        if( doc.length != 0 ){
+            filter = { symbol: req.body.symbol}
+            update = { avgPrice: ((doc[0].amount*doc[0].avgPrice)+(req.body.price*req.body.amount))/(req.body.amount+doc[0].amount),
+                       amount: doc[0].amount + req.body.amount }
+            await positionDataModel.findOneAndUpdate(filter, update, opts).exec()
+            console.log('update a existing symbol successful')
+        }
+        // // new symbol for position
+        else{
+            await positionDataModel.insertMany({symbol: req.body.symbol, avgPrice: req.body.price, amount: req.body.amount}, opts)
+            console.log('insert a new symbol to position')
+        }
+        await session.commitTransaction();
+        session.endSession();
+        res.send('Adding trade data success');
+    // }
+    // catch(e){
+    //     await session.abortTransaction();
+    //     session.endSession();
+    //     // console.log('Transaction error')
+    //     res.send('Adding trade data fail');
+    //     throw e;
+    // }
     
-    var doc = await positionDataModel.find({symbol: req.body.symbol}).exec()
-    // console.log('doc[0]', doc[0])
-    // console.log('doc[0].amount', doc[0].amount);
-    // position has this symbol
-    if( doc.length != 0 ){
-        filter = { symbol: req.body.symbol}
-        update = { avgPrice: ((doc[0].amount*doc[0].avgPrice)+(req.body.price*req.body.amount))/(req.body.amount+doc[0].amount),
-                   amount: doc[0].amount + req.body.amount }
-        await positionDataModel.findOneAndUpdate(filter, update).exec()
-        console.log('update a existing symbol successful')
-    }
-    // // new symbol for position
-    else{
-        await positionDataModel.insertMany({symbol: req.body.symbol, avgPrice: req.body.price, amount: req.body.amount})
-        console.log('insert a new symbol to position')
-    }
 })
 
 // ======= Update =======
-app.put('/api/stocks/:id', async(req, res)=>{
+app.put('/api/trade/:id', async(req, res)=>{
     var trade_doc = await historicalTradeDataModel.findByIdAndUpdate(req.params.id,
         {price: req.body.price, amount: req.body.amount})
     .then(console.log('update success'))
@@ -113,7 +132,7 @@ app.put('/api/stocks/:id', async(req, res)=>{
 })
 // 
 // ======== Delete ========
-app.delete('/api/stocks/:id', async (req, res)=> {
+app.delete('/api/trade/:id', async (req, res)=> {
     
     var trade_doc = await historicalTradeDataModel.findByIdAndRemove(req.params.id)
     .then(console.log('delete success'))
@@ -140,7 +159,7 @@ async function main(){
 
     const openUrl = `mongodb://${user}:${pw}@${svr}:${port}/${db}`;
     //const openUrl = "mongodb://jo1ce:Alan0114@localhost:27018/trade";
-    await mongoose.connect(openUrl, {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true }).then(console.log('DB connected!'))
+    await mongoose.connect(openUrl, {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true}).then(console.log('DB connected!'))
 
     // await historicalTradeDataModel.find((err, res)=>{
     //     if(err) console.log(err)
