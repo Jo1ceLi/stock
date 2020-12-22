@@ -113,7 +113,7 @@ app.delete('/api/trade/:id', async (req, res)=> {
   
 //TODO #10 Implement DB side delete api @Jo1ceLi
 
-const app_port = 3000;
+const app_port = 8080;
 app.listen(app_port, ()=>{
     console.log(`listening port ${app_port}`);
 })
