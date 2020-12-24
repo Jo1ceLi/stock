@@ -1,9 +1,9 @@
 var yf = require('yahoo-finance')
 var mongoose = require('mongoose')
-var positionModel = require('./models/Position')
-var historicalStockDataModel = require('./models/HistoryStockData')
+var positionModel = require('../models/Position')
+var historicalStockDataModel = require('../models/HistoryStockData')
 
-var connection = require("./share/connection")
+var connection = require("../share/connection")
 
 const Connection = new connection()
 Connection.connect();

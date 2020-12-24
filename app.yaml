@@ -13,4 +13,6 @@
 
 # [START gae_quickstart_yaml]
 runtime: nodejs14
+env_variables:
+  SCRIPT_TO_RUN: './trade_history_local.js'
 # [END gae_quickstart_yaml]
