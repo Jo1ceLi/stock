@@ -4,5 +4,5 @@ steps:
   timeout: "1600s"
 
 - name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy"]
+  args: ["app", "deploy", "quote_yahoo.yaml"]
   timeout: "1600s"
