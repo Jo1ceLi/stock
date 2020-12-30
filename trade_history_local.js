@@ -2,6 +2,11 @@ var mongoose = require('mongoose')
 var express = require('express')
 var bodyParser = require('body-parser')
 var cors = require('cors')
+var connection = require("./share/connection");
+
+const Connection = new connection()
+Connection.connect();
+
 var positionModel = require('./models/Position')
 var historicalTradeDataModel = require('./models/HistoricalTradeData')
 
@@ -13,29 +18,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-require('dotenv').config()
-var user;
-var pw;
-var svr;
-var db;
-var port;
-if(process.env.ENV==="DEV"){
-    // console.log('Dev environment configuration is preparing')
-    user = process.env.DEV_DB_USER;
-    pw = process.env.DEV_DB_PASSWORD;
-    svr = process.env.DEV_DB_SERVER;
-    db = process.env.DEV_DB_NAME;
-    port = process.env.DEV_PORT;
-}else if(process.env.ENV==="PROD"){
-    // console.log('Production environment configuration is preparing')
-    user = process.env.PROD_DB_USER;
-    pw = process.env.PROD_DB_PASSWORD;
-    svr = process.env.PROD_DB_SERVER;
-    db = process.env.PROD_DB_NAME;
-    port = process.env.PROD_PORT;
-}else{
-    console.log('Can not recognize this enviroment')
-}
 
 var Position = positionModel.PositionModel;
 var HistoricalTradeData = historicalTradeDataModel.HistoricalTradeDataModel;
@@ -131,13 +113,13 @@ app.delete('/api/trade/:id', async (req, res)=> {
   
 //TODO #10 Implement DB side delete api @Jo1ceLi
 
-const app_port = 3000;
+const app_port = 8080;
 app.listen(app_port, ()=>{
     console.log(`listening port ${app_port}`);
 })
 
-async function main(){
-    const openUrl = `mongodb://${user}:${pw}@${svr}:${port}/${db}`;
-    await mongoose.connect(openUrl, {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true}).then(console.log('DB connected!'))
-}
-main();
+// async function main(){
+//     const openUrl = `mongodb://${user}:${pw}@${svr}:${port}/${db}`;
+//     await mongoose.connect(openUrl, {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true}).then(console.log('DB connected!'))
+// }
+// main();

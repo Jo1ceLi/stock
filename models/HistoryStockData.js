@@ -4,32 +4,23 @@ var connection = require("../share/connection");
 const Connection = new connection()
 Connection.connect();
 
-const positionSchema = new mongoose.Schema(
+const historicalStockDataSchema = new mongoose.Schema(
     {
         symbol:{
             type: String,
             required: true
         },
-        cost:{
+        closingprice:{
             type: Number,
             required: true
         },
-        amount:{
-            type: Number,
+        date:{
+            type: Date,
             required: true
         }
     }
 )
 
-exports.PositionModel = mongoose.model('position', positionSchema);
+exports.HistoricalStockDataModel = mongoose.model('historical_stock_data', historicalStockDataSchema);
 
-async function main(){
-    
-    
-    await Position.insertMany(positionDatas)
-    .then(value=>{
-        console.log(value);
-    });
-    
-    mongoose.connection.close();
-}
+

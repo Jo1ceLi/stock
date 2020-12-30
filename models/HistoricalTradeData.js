@@ -1,34 +1,8 @@
 var mongoose = require('mongoose');
+// var connection = require("../share/connection");
 
-
-require('dotenv').config()
-var user;
-var pw;
-var svr;
-var db;
-var port;
-if(process.env.ENV==="DEV"){
-    // console.log('Dev environment configuration is preparing')
-    user = process.env.DEV_DB_USER;
-    pw = process.env.DEV_DB_PASSWORD;
-    svr = process.env.DEV_DB_SERVER;
-    db = process.env.DEV_DB_NAME;
-    port = process.env.DEV_PORT;
-}else if(process.env.ENV==="PROD"){
-    // console.log('Production environment configuration is preparing')
-    user = process.env.PROD_DB_USER;
-    pw = process.env.PROD_DB_PASSWORD;
-    svr = process.env.PROD_DB_SERVER;
-    db = process.env.PROD_DB_NAME;
-    port = process.env.PROD_PORT;
-}else{
-    console.log('Can not recognize this enviroment')
-}
-
-const openUrl = `mongodb://${user}:${pw}@${svr}:${port}/${db}`;
-const options = {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true}
-mongoose.connect(openUrl, options)
-.then(console.log('DB connected!'))
+// const Connection = new connection()
+// Connection.connect();
 
 const historicalTradeDataSchema = new mongoose.Schema(
     {
@@ -51,8 +25,9 @@ const historicalTradeDataSchema = new mongoose.Schema(
     }
 )
 
-exports.HistoricalTradeDataModel = mongoose.model('historical_trade_data', historicalTradeDataSchema);
-
+// exports.HistoricalTradeDataModel = mongoose.model('historical_trade_data', historicalTradeDataSchema);
+let HistoricalTradeDataModel = mongoose.model('historical_trade_data', historicalTradeDataSchema);
+module.exports = HistoricalTradeDataModel;
 async function main(){
     
     
