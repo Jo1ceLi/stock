@@ -1,9 +1,4 @@
 var mongoose = require('mongoose');
-var connection = require("../share/connection");
-
-const Connection = new connection()
-Connection.connect();
-
 const historicalStockDataSchema = new mongoose.Schema(
     {
         symbol:{
@@ -22,5 +17,3 @@ const historicalStockDataSchema = new mongoose.Schema(
 )
 
 exports.HistoricalStockDataModel = mongoose.model('historical_stock_data', historicalStockDataSchema);
-
-
