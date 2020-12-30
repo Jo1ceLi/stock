@@ -1,8 +1,8 @@
 var mongoose = require('mongoose');
-var connection = require("../share/connection");
+// var connection = require("../share/connection");
 
-const Connection = new connection()
-Connection.connect();
+// const Connection = new connection()
+// Connection.connect();
 
 const historicalTradeDataSchema = new mongoose.Schema(
     {
@@ -25,8 +25,9 @@ const historicalTradeDataSchema = new mongoose.Schema(
     }
 )
 
-exports.HistoricalTradeDataModel = mongoose.model('historical_trade_data', historicalTradeDataSchema);
-
+// exports.HistoricalTradeDataModel = mongoose.model('historical_trade_data', historicalTradeDataSchema);
+let HistoricalTradeDataModel = mongoose.model('historical_trade_data', historicalTradeDataSchema);
+module.exports = HistoricalTradeDataModel;
 async function main(){
     
     
