@@ -19,7 +19,6 @@ async function quotePosition() {
     result.forEach(element => {
         position_symbol.push(element.symbol);
     });
-    position_symbol.pop()
     return position_symbol
     
 }
