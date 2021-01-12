@@ -7,8 +7,9 @@ var connection = require("./share/connection");
 const Connection = new connection()
 Connection.connect();
 
-var positionModel = require('./models/Position')
+var positionModel = require('./models/Position');
 var historicalTradeDataModel = require('./models/HistoricalTradeData')
+var cashDataModel = require('./models/Cash');
 
 var app = express()
 // use cors
@@ -117,3 +118,9 @@ const app_port = 8080;
 app.listen(app_port, ()=>{
     console.log(`listening port ${app_port}`);
 })
+
+// async function main(){
+//     const openUrl = `mongodb://${user}:${pw}@${svr}:${port}/${db}`;
+//     await mongoose.connect(openUrl, {useFindAndModify: false, useUnifiedTopology: true, useNewUrlParser: true}).then(console.log('DB connected!'))
+// }
+// main();
