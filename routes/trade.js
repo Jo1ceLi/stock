@@ -33,12 +33,16 @@ router.post('/api/trade', async(req, res)=>{
 
     if( doc.length != 0 ){
         filter = { symbol: req.body.symbol }
-        update = { cost: ((doc[0].amount*doc[0].cost) + 
-            (req.body.price*req.body.amount)) / 
-            (req.body.amount+doc[0].amount),
-            amount: doc[0].amount + req.body.amount }
-        await Position.findOneAndUpdate(filter, update).exec()
-        console.log('update a existing symbol successful')
+        if(req.body.amount+doc[0].amount === 0){
+            await Position.deleteOne(filter);
+        }else{
+            update = { cost: ((doc[0].amount*doc[0].cost) + 
+                (req.body.price*req.body.amount)) / 
+                (req.body.amount+doc[0].amount),
+                amount: doc[0].amount + req.body.amount }
+            await Position.findOneAndUpdate(filter, update).exec()
+            console.log('update a existing symbol successful')
+        }
     }
     else{
         await Position.insertMany(

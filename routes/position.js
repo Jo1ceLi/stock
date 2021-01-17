@@ -23,16 +23,18 @@ router.get('/api/cash', async (req, res)=>{
     res.json(docs);
 })
 
-router.get('/api/last-closing-price', async(req, res)=>{
-    today = new Date()
-    today.setDate(today.getDate()-1);
-    var lastClosingPrice = await HistoryStockData.find({date: {$gte: today}})
+router.get('/api/closingprice/:date', async(req, res)=>{
+    var date = new Date(req.params.date);
+    var nextday = new Date(req.params.date);
+    console.log(date);
+    console.log(Date(nextday.setDate(nextday.getDate()+1)));
+    var lastClosingPrice = await HistoryStockData.find({date: {$gte: date, $lt: nextday }})
     .exec();
-    var positions = await Position.find()
-    .exec();
+    // var positions = await Position.find()
+    // .exec();
 
     // positionInfo = lastClosingPrice.concat(positions);
-    res.json();
+    res.json(lastClosingPrice);
 })
 
 router.get('/api/close-price-of-2020', async(req, res)=>{
