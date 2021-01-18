@@ -1,4 +1,4 @@
 runtime: nodejs14
-service: schedule_update_historical_positions
+service: schedule-update-historical-positions
 env_variables:
   SCRIPT_TO_RUN: './quote_yahoo/Schedule_HistoricalPosition.js'
