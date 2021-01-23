@@ -12,6 +12,7 @@ const app = express();
 //route
 const tradeRoute = require('./routes/trade');
 const positionRoute = require('./routes/position');
+const auth = require('./routes/auth');
 
 
 // midleware
@@ -22,6 +23,7 @@ app.use(bodyParser.json())
 //route
 app.use('/', tradeRoute);
 app.use('/', positionRoute);
+app.use('/', auth);
 
 app.listen(8080, 
     ()=>console.log('Server up and running'));
