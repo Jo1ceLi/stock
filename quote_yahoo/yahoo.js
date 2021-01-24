@@ -35,7 +35,7 @@ async function quoteAndWriteDB(symbols) {
             await HistoricalStockData.find({symbol: symbol, date:res.price.regularMarketTime} 
             ).then(async resolve=>{
                 if(resolve.length==0){
-                   await HistoricalStockData.insertMany({symbol: symbol, closingprice: res.price.regularMarketPreviousClose, date: res.price.regularMarketTime})
+                    await HistoricalStockData.insertMany({symbol: symbol, closingprice: res.price.regularMarketPrice, date: res.price.regularMarketTime})
                 }else{
                     console.log('Data already exist')
                 }
