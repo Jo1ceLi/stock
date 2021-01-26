@@ -1,12 +1,12 @@
 steps:
 - name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy"]
+  args: ["app", "deploy", "deployyaml/app.yaml"]
   timeout: "1600s"
 
 - name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy", "quote_yahoo.yaml"]
+  args: ["app", "deploy", "deployyaml/quote_yahoo.yaml"]
   timeout: "1600s"
 
 - name: "gcr.io/cloud-builders/gcloud"
-  args: ["app", "deploy", "schedule_historical_position.yaml"]
+  args: ["app", "deploy", "deployyaml/schedule_historical_position.yaml"]
   timeout: "1600s"
