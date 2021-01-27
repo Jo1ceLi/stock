@@ -3,6 +3,33 @@ const jwt = require('jsonwebtoken');
 const AccountModel = require('../models/Account');
 const jwtSecret = 'alskdjflkasdjflas';
 
+router.post('/register', (req, res)=>{
+    AccountModel.find({email: req.body.email}, 
+    (err, response)=>{
+        if(err){
+            res.send('Finding account db error', err);
+        }else{
+            if(response){
+                console.log(response);
+                res.send('User email has been used');
+            }else{
+                AccountModel.insertMany({ email: req.body.email, 
+                password: req.body.password,
+                createdate: new Date(),
+                name: req.body.name }, (err, doc)=>{
+                    if(err){
+                        console.log(err);
+                        res.status(400).send('Can not create user ');
+                    }else{
+                        console.log(doc);
+                        res.send('Created user successful');
+                    }
+                })
+            }
+        }
+    })
+})
+
 router.post('/login', (req, res)=>{
     AccountModel.find({ email: req.body.email,
                         password: req.body.password }, 
