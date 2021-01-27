@@ -18,6 +18,15 @@ router.get('/api/positions', async (req, res)=>{
     res.json(docs)
 })
 
+router.get('/api/positions/period', async (req, res)=>{
+    var from = new Date(req.query.from);
+    var to = new Date(req.query.to);
+    Date(to.setDate(to.getDate()+1));
+    var result = await HistoricalPositionModel.find({date: {$gte: from, $lt: to}}).exec();
+    res.json(result);
+
+})
+
 router.get('/api/positions/:date', async (req, res) => {
     var date = new Date(req.params.date);
     var nextday = new Date(req.params.date);
@@ -42,6 +51,14 @@ router.get('/api/closingprice/:date', async(req, res)=>{
     var lastClosingPrice = await HistoryStockData.find({date: {$gte: date, $lt: nextday }})
     .exec();
     res.json(lastClosingPrice);
+})
+
+router.get('/api/stock/period', async(req, res)=>{
+    var from = new Date(req.query.from);
+    var to = new Date(req.query.to);
+    Date(to.setDate(to.getDate()+1));
+    var result = await HistoryStockData.find({date: {$gte: from, $lt: to}}).exec();
+    res.json(result);
 })
 
 router.get('/api/close-price-of-2020', async(req, res)=>{
