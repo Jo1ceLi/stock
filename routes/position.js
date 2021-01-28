@@ -4,6 +4,7 @@ var positionModel = require('../models/Position');
 var historicalTradeDataModel = require('../models/HistoricalTradeData');
 var historicalPositionModel = require('../models/HistoricalPosition');
 var hisotryStockDataModel = require('../models/HistoryStockData')
+var historicalCashDataModel = require('../models/HistoricalCashData');
 var cashDataModel = require('../models/cashData');
 const { model } = require('mongoose');
 
@@ -18,6 +19,15 @@ router.get('/api/positions', async (req, res)=>{
     res.json(docs)
 })
 
+router.get('/api/positions/period', async (req, res)=>{
+    var from = new Date(req.query.from);
+    var to = new Date(req.query.to);
+    Date(to.setDate(to.getDate()+1));
+    var result = await HistoricalPositionModel.find({date: {$gte: from, $lt: to}}).exec();
+    res.json(result);
+
+})
+
 router.get('/api/positions/:date', async (req, res) => {
     var date = new Date(req.params.date);
     var nextday = new Date(req.params.date);
@@ -28,10 +38,38 @@ router.get('/api/positions/:date', async (req, res) => {
     res.json(result);
 })
 
+router.post('/api/cash/dw', async(req, res)=>{
+    Cash.find({currency: req.query.currency},(err, response)=>{
+        if(err){
+            res.send(err);
+        }else{
+            oriAmount = response[0].amount;
+            Cash.updateOne({currency: req.query.currency},
+                {amount: oriAmount + req.body.amount}, 
+                (err, raw)=>{
+                    if(err){
+                        console.log(err)
+                    }else{
+                        res.send('Update cash successful');
+                    }
+                });
+        }
+    })
+
+})
+
 router.get('/api/cash', async (req, res)=>{
     var docs = await Cash.find()
     .then();
     res.json(docs);
+})
+
+router.get('/api/cash/period', async(req, res)=>{
+    var from = new Date(req.query.from);
+    var to = new Date(req.query.to);
+    Date(to.setDate(to.getDate()+1));
+    var result = await historicalCashDataModel.find({date: {$gte: from, $lt: to}}).exec();
+    res.json(result);
 })
 
 router.get('/api/closingprice/:date', async(req, res)=>{
@@ -42,6 +80,14 @@ router.get('/api/closingprice/:date', async(req, res)=>{
     var lastClosingPrice = await HistoryStockData.find({date: {$gte: date, $lt: nextday }})
     .exec();
     res.json(lastClosingPrice);
+})
+
+router.get('/api/stock/period', async(req, res)=>{
+    var from = new Date(req.query.from);
+    var to = new Date(req.query.to);
+    Date(to.setDate(to.getDate()+1));
+    var result = await HistoryStockData.find({date: {$gte: from, $lt: to}}).exec();
+    res.json(result);
 })
 
 router.get('/api/close-price-of-2020', async(req, res)=>{

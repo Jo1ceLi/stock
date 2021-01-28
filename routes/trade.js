@@ -2,10 +2,10 @@ const router = require('express').Router();
 
 var positionModel = require('../models/Position')
 var historicalTradeDataModel = require('../models/HistoricalTradeData')
-
+var CashModel = require('../models/cashData');
 var Position = positionModel.PositionModel;
 var HistoricalTradeData = historicalTradeDataModel.HistoricalTradeDataModel;
-
+var Cash = CashModel.CashDataModel;
 
 // Read
 router.get('/api/trade/:id', async(req, res)=>{
@@ -25,8 +25,23 @@ router.get('/api/trade', async (req, res)=>{
 router.post('/api/trade', async(req, res)=>{
     var trade_insertManyRes = await HistoricalTradeData.insertMany(
         {symbol: req.body.symbol, price: req.body.price, 
-            amount: req.body.amount, date: req.body.date})
-
+            amount: req.body.amount, date: req.body.date});
+    // #43
+    Cash.find((err, response)=>{
+        if(err){
+            console.log(err);
+        }else{
+            console.log(response[0].amount);
+            Cash.updateOne({}
+            , {amount: response[0].amount - (req.body.amount * req.body.price)}
+            , (err)=>{
+                if(err){
+                    console.log(err);
+                }
+            })
+        }
+    })
+    
     console.log("tradeInsertManyRes",trade_insertManyRes);
     var doc = await Position.find(
         {symbol: req.body.symbol}).exec()
@@ -60,10 +75,29 @@ router.put('/api/trade/:id', async(req, res)=>{
     .then(console.log('update success'))
     .catch(err=>{
         res.send('Can not find this data in trade data')
-    })
+    });
+
     res.json(trade_doc)
     var position_doc = await Position.find(
-        {symbol: trade_doc.symbol}).exec()
+        {symbol: trade_doc.symbol}).exec();
+    
+    // #43
+    Cash.find((err, response)=>{
+        if(err){
+            console.log(err);
+        }else{
+            Cash.updateOne({}
+            , {amount: response[0].amount + (trade_doc.price * trade_doc.amount) - (req.body.amount * req.body.price)}
+            , (err)=>{
+                if(err){
+                    console.log(err);
+                }else{
+                    console.log('update cash successful');
+                }
+            })
+        }
+    });
+
     if(position_doc.length === 0){
         console.log('Error! Symbol is not in position data!')
     }else{
@@ -85,6 +119,24 @@ router.delete('/api/trade/:id', async (req, res)=> {
     
     var trade_doc = await HistoricalTradeData.findByIdAndRemove(req.params.id)
     .then(console.log('delete success'))
+
+    // #43
+    Cash.find((err, response)=>{
+        if(err){
+            console.log(err);
+        }else{
+            Cash.updateOne({}
+            , {amount: response[0].amount + (trade_doc.price * trade_doc.amount)}
+            , (err)=>{
+                if(err){
+                    console.log(err);
+                }else{
+                    console.log('update cash successful');
+                }
+            })
+        }
+    });
+
     var position_doc = await Position.find({symbol: trade_doc.symbol}).exec()
     if(position_doc.length === 0){
         console.log('Error! Symbol is not in position data!')
