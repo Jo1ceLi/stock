@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const AccountModel = require('../models/Account');
-const jwtSecret = 'alskdjflkasdjflas';
+const serect = require('../secret');
+
 
 router.post('/register', (req, res)=>{
     AccountModel.find({email: req.body.email}, 
@@ -30,7 +31,8 @@ router.post('/register', (req, res)=>{
     })
 })
 
-router.post('/login', (req, res)=>{
+router.post('/login', async(req, res)=>{
+    const jwtSecret = await serect('projects/373314551889/secrets/jwtSecret/versions/latest');
     AccountModel.find({ email: req.body.email,
                         password: req.body.password }, 
     (err, response) => {
@@ -50,7 +52,8 @@ router.post('/login', (req, res)=>{
     
 })
 
-router.post('/verify', (req, res) => {
+router.post('/verify', async(req, res) => {
+    const jwtSecret = await serect('projects/373314551889/secrets/jwtSecret/versions/latest');
     jwt.verify(req.body.access_token, jwtSecret, (err, decoded)=> {
         if(err){
             console.log('jwt verify error')
