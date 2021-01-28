@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 var positionModel = require('../models/Position');
 var historicalTradeDataModel = require('../models/HistoricalTradeData');
-// var lastDayPositionModel = require('../position_2020');
+var historicalPositionModel = require('../models/HistoricalPosition');
 var hisotryStockDataModel = require('../models/HistoryStockData')
 var cashDataModel = require('../models/cashData');
 const { model } = require('mongoose');
@@ -10,11 +10,22 @@ const { model } = require('mongoose');
 var Position = positionModel.PositionModel;
 var Cash = cashDataModel.CashDataModel;
 var HistoryStockData = hisotryStockDataModel.HistoricalStockDataModel;
+var HistoricalPositionModel = historicalPositionModel.HistoricalPositionModel;
 
 router.get('/api/positions', async (req, res)=>{
     var docs = await Position.find()
     .then()
     res.json(docs)
+})
+
+router.get('/api/positions/:date', async (req, res) => {
+    var date = new Date(req.params.date);
+    var nextday = new Date(req.params.date);
+    Date(nextday.setDate(nextday.getDate()+1))
+    var result = await HistoricalPositionModel.find(
+        { date: {$gte: date, $lt: nextday }}
+    ).exec()
+    res.json(result);
 })
 
 router.get('/api/cash', async (req, res)=>{
@@ -30,10 +41,6 @@ router.get('/api/closingprice/:date', async(req, res)=>{
     console.log(Date(nextday.setDate(nextday.getDate()+1)));
     var lastClosingPrice = await HistoryStockData.find({date: {$gte: date, $lt: nextday }})
     .exec();
-    // var positions = await Position.find()
-    // .exec();
-
-    // positionInfo = lastClosingPrice.concat(positions);
     res.json(lastClosingPrice);
 })
 
@@ -44,20 +51,7 @@ router.get('/api/close-price-of-2020', async(req, res)=>{
     .exec();
     var positions = await Position.find()
     .exec();
-
-    // positionInfo = lastClosingPrice.concat(positions);
     res.json(lastClosingPrice);
 })
-
-// router.get('/api/positions-of-2020', async(req, res)=>{
-//     today = new Date()
-//     today.setDate(today.getDate()-1);
-//     var lastDayPositions = await lastDayPositionModel.find()
-//     .exec();
-
-
-//     // positionInfo = lastClosingPrice.concat(positions);
-//     res.json(lastDayPositions);
-// })
 
 module.exports = router
