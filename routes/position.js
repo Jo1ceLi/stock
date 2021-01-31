@@ -15,6 +15,7 @@ var HistoricalPositionModel = historicalPositionModel.HistoricalPositionModel;
 
 router.get('/api/positions', async (req, res)=>{
     var docs = await Position.find()
+    .sort([['symbol', 1]])
     .then()
     res.json(docs)
 })
@@ -23,7 +24,9 @@ router.get('/api/positions/period', async (req, res)=>{
     var from = new Date(req.query.from);
     var to = new Date(req.query.to);
     Date(to.setDate(to.getDate()+1));
-    var result = await HistoricalPositionModel.find({date: {$gte: from, $lt: to}}).exec();
+    var result = await HistoricalPositionModel.find({date: {$gte: from, $lt: to}})
+    .sort([['symbol', 1]])
+    .exec();
     res.json(result);
 
 })
@@ -34,7 +37,9 @@ router.get('/api/positions/:date', async (req, res) => {
     Date(nextday.setDate(nextday.getDate()+1))
     var result = await HistoricalPositionModel.find(
         { date: {$gte: date, $lt: nextday }}
-    ).exec()
+    )
+    .sort([['symbol', 1]])
+    .exec()
     res.json(result);
 })
 
@@ -68,7 +73,9 @@ router.get('/api/cash/period', async(req, res)=>{
     var from = new Date(req.query.from);
     var to = new Date(req.query.to);
     Date(to.setDate(to.getDate()+1));
-    var result = await historicalCashDataModel.find({date: {$gte: from, $lt: to}}).exec();
+    var result = await historicalCashDataModel.find({date: {$gte: from, $lt: to}})
+    .sort([['symbol', 1]])
+    .exec();
     res.json(result);
 })
 
@@ -78,6 +85,7 @@ router.get('/api/closingprice/:date', async(req, res)=>{
     console.log(date);
     console.log(Date(nextday.setDate(nextday.getDate()+1)));
     var lastClosingPrice = await HistoryStockData.find({date: {$gte: date, $lt: nextday }})
+    .sort([['symbol', 1]])
     .exec();
     res.json(lastClosingPrice);
 })
@@ -86,7 +94,9 @@ router.get('/api/stock/period', async(req, res)=>{
     var from = new Date(req.query.from);
     var to = new Date(req.query.to);
     Date(to.setDate(to.getDate()+1));
-    var result = await HistoryStockData.find({date: {$gte: from, $lt: to}}).exec();
+    var result = await HistoryStockData.find({date: {$gte: from, $lt: to}})
+    .sort([['symbol', 1]])
+    .exec();
     res.json(result);
 })
 
