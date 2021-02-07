@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+let spawn = require("child_process").spawn
 var positionModel = require('../models/Position');
 var historicalTradeDataModel = require('../models/HistoricalTradeData');
 var historicalPositionModel = require('../models/HistoricalPosition');
@@ -12,6 +13,20 @@ var Position = positionModel.PositionModel;
 var Cash = cashDataModel.CashDataModel;
 var HistoryStockData = hisotryStockDataModel.HistoricalStockDataModel;
 var HistoricalPositionModel = historicalPositionModel.HistoricalPositionModel;
+
+router.get('/api/test', (req, res)=>{
+    // console.log(req.body.name);
+    var spawn = require("child_process").spawn
+    var process = spawn('python', ["./assetCalculate.py",
+    req.body.name, req.body.user])
+
+    process.stdout.on('data', (data) => {
+    // data = data.toString()
+    result = JSON.parse(data)
+    res.json(result)
+    // console.log('asdf')
+    })
+})
 
 router.get('/api/positions', async (req, res)=>{
     var docs = await Position.find()
@@ -26,8 +41,17 @@ router.get('/api/positions/period', async (req, res)=>{
     Date(to.setDate(to.getDate()+1));
     var result = await HistoricalPositionModel.find({date: {$gte: from, $lt: to}})
     .sort([['symbol', 1]])
-    .exec();
-    res.json(result);
+    .exec(); 
+    var process = spawn('python', ["./assetCalculate.py",
+    req.query.from, req.query.to])
+
+    process.stdout.on('data', (data) => {
+    // data = data.toString()
+    response = JSON.parse(data)
+    res.json(response)
+    // console.log('asdf')
+    })
+    // res.json(result);
 
 })
 
@@ -97,6 +121,7 @@ router.get('/api/stock/period', async(req, res)=>{
     var result = await HistoryStockData.find({date: {$gte: from, $lt: to}})
     .sort([['symbol', 1]])
     .exec();
+
     res.json(result);
 })
 
