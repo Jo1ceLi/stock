@@ -2,7 +2,7 @@ var yf = require('yahoo-finance')
 var mongoose = require('mongoose')
 var positionModel = require('../models/Position')
 var historicalStockDataModel = require('../models/HistoryStockData')
-
+var moment = require('moment')
 var connection = require("../share/connection")
 
 const Connection = new connection()
@@ -32,7 +32,8 @@ async function quoteAndWriteDB(symbols) {
                 modules: ['price']
             })
         .then(async res=>{
-            await HistoricalStockData.find({symbol: symbol, date:res.price.regularMarketTime} 
+            await HistoricalStockData.find({symbol: symbol, date:{$gte: moment(res.price.regularMarketTime).startOf('day').toDate(),
+                                                                  $lt:  moment(res.price.regularMarketTime).endOf('day').toDate()}} 
             ).then(async resolve=>{
                 if(resolve.length==0){
                     await HistoricalStockData.insertMany({symbol: symbol, closingprice: res.price.regularMarketPrice, date: res.price.regularMarketTime})
